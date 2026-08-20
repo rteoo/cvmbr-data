@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 from cvmpy.catalog import catalog_paths
-from cvmpy.client import fetch, fetch_itr, iter_rows, list_tables
+from cvmpy.client import fetch, fetch_itr, iter_archive_rows, iter_rows, list_tables
 from cvmpy.exceptions import CVMEmptyResponseError, CVMError
 
 
@@ -133,6 +133,12 @@ class TestFetch:
         )
         rows = list(iter_rows("INF_DIARIO", cache_dir_path=cache))
         assert len(rows) == 1
+
+    def test_iter_archive_rows_applies_hygiene_to_csv_bytes(self):
+        rows = list(iter_archive_rows(ITR_CSV.encode("latin-1"), company="15423"))
+        assert len(rows) == 1
+        assert rows[0]["VERSAO"] == "2"
+        assert rows[0]["ORDEM_EXERC"] == "ÚLTIMO"
 
     def test_unknown_company_is_empty(self, tmp_path):
         cache = _seed(

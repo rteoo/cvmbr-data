@@ -8,6 +8,7 @@ from cvmpy.catalog import (
     catalog_diff,
     catalog_paths,
     coverage,
+    crawl_worker_count,
     listing,
     load_catalog,
     overlaps,
@@ -189,6 +190,20 @@ class TestSelect:
     def test_coverage_includes_hist(self):
         ds = resolve_dataset(_catalog(), "INF_DIARIO")
         assert coverage(ds) == "2005..2026-08"
+
+
+class TestWorkers:
+    def test_default_is_two(self, monkeypatch):
+        monkeypatch.delenv("CVMPY_CRAWL_WORKERS", raising=False)
+        assert crawl_worker_count() == 2
+
+    def test_env_override(self, monkeypatch):
+        monkeypatch.setenv("CVMPY_CRAWL_WORKERS", "1")
+        assert crawl_worker_count() == 1
+
+    def test_rejects_zero(self):
+        with pytest.raises(ValueError):
+            crawl_worker_count(0)
 
 
 class TestCatalogFiles:

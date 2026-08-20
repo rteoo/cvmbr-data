@@ -47,9 +47,9 @@ download_filings(docs, out="./filings")
 
 The portal is a CKAN catalog over a directory autoindex. CKAN alone misses `DADOS/HIST/` (multi-GB archives). Call `refresh_catalog()` before trusting `list_datasets` or `fetch`.
 
-#### `refresh_catalog(cache_dir_path=None)`
+#### `refresh_catalog(cache_dir_path=None, workers=None)`
 
-Crawl `https://dados.cvm.gov.br/dados/` (including `HIST/`), merge CKAN titles, and write `catalog.json` to the cache directory.
+Crawl `https://dados.cvm.gov.br/dados/` (including `HIST/`), merge CKAN titles, and write `catalog.json` to the cache directory. Default concurrency is two requests per host (`CVMPY_CRAWL_WORKERS` or `workers=`).
 
 #### `list_datasets(area=None, grep=None)`
 
@@ -83,9 +83,13 @@ print(DATASETS["ITR"])  # CIA_ABERTA/DOC/ITR
 
 Convenience wrappers: `fetch_itr`, `fetch_dfp`, `fetch_inf_diario`, `fetch_cda`, `fetch_cadastro`.
 
-#### `iter_rows(...)` / `list_tables(dataset)`
+#### `fetch_source_objects(dataset, start=None, end=None)`
 
-Row generator (no DataFrame) and table/column inventory of the newest matching archive.
+Mirror matching ZIPs (no duplicate download when the catalog stamp is unchanged) and return `SourceObjectMeta` records: SHA-256, exact byte size, source URL, local path, fetch time, HTTP headers, library version, and parser version `cvm-csv-latin1-1`. Import this from `cvmpy`, not from `cvmpy.mirror`.
+
+#### `iter_rows(...)` / `iter_archive_rows(payload)` / `list_tables(dataset)`
+
+Row generator over mirrored archives, row generator over a ZIP/CSV already in memory (warehouse replay), and table/column inventory of the newest matching archive.
 
 ### RAD/ENET filings
 

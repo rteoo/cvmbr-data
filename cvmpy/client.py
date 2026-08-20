@@ -14,7 +14,7 @@ from .catalog import (
     resolve_dataset,
     selected_files,
 )
-from .constants import UNBOUNDED_PATHS
+from .constants import PARSER_VERSION, UNBOUNDED_PATHS
 from .exceptions import CVMEmptyResponseError, CVMError
 from .hygiene import (
     ORDEM_CHOICES,
@@ -30,6 +30,84 @@ from .hygiene import (
     table_key,
 )
 from .mirror import Mirror
+
+
+def fetch_source_objects(
+    dataset: str,
+    start: str | None = None,
+    end: str | None = None,
+    cache_dir_path: str | Path | None = None,
+):
+    """Mirror matching archives and return public source-object descriptors.
+
+    Callers should import this from ``cvmpy``, not ``cvmpy.mirror``.
+    """
+    start = _normalize_period(start)
+    end = _normalize_period(end)
+    cache = cache_dir(cache_dir_path)
+    catalog = load_catalog(cache)
+    ds = resolve_dataset(catalog, dataset)
+    files = selected_files(ds, start, end)
+    if not files:
+        raise CVMEmptyResponseError(f"{ds['path']} has no files for the requested period")
+    from .http import HttpClient
+
+    client = HttpClient()
+    mirror = Mirror(cache / "mirror", client=client)
+    return [mirror.describe(entry) for entry in files]
+
+
+def _rows_from_archive(
+    archive: Path,
+    *,
+    table: str | None,
+    wanted: set[str] | None,
+    ordem_value: str | None,
+    keep_all_versions: bool,
+):
+    for member in members(archive, table):
+        header = read_header(archive, member)
+        best = None
+        if not keep_all_versions and find_column(header, *VERSION_COLUMNS):
+            best = best_versions(archive, member, header, wanted)
+        for row in rows_of(archive, member):
+            if keep_row(row, header, wanted, best, ordem_value):
+                yield row
+
+
+def iter_archive_rows(
+    payload: bytes,
+    *,
+    table: str | None = None,
+    company=None,
+    ordem: str = "ultimo",
+    keep_all_versions: bool = False,
+):
+    """Yield hygienic row dicts from a ZIP or latin-1 CSV already in memory.
+
+    Warehouse ingest uses this on registered raw bytes. It does not contact the portal.
+    """
+    import tempfile
+    import zipfile
+
+    if ordem not in ORDEM_CHOICES and ordem != "all":
+        raise ValueError("ordem must be 'ultimo', 'penultimo', or 'all'")
+    wanted = _wanted_companies(company)
+    ordem_value = None if ordem == "all" else ORDEM_CHOICES[ordem]
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "payload.zip"
+        if payload[:2] == b"PK":
+            path.write_bytes(payload)
+        else:
+            with zipfile.ZipFile(path, "w") as zipped:
+                zipped.writestr("document.csv", payload)
+        yield from _rows_from_archive(
+            path,
+            table=table,
+            wanted=wanted,
+            ordem_value=ordem_value,
+            keep_all_versions=keep_all_versions,
+        )
 
 
 def _normalize_period(value: str | None) -> str | None:
@@ -135,15 +213,13 @@ def iter_rows(
 
     for entry in files:
         archive = mirror.get(entry)
-        prefix = re.sub(r"_((?:19|20)\d{2}(?:0[1-9]|1[0-2])?)$", "", Path(archive).stem)
-        for member in members(archive, table):
-            header = read_header(archive, member)
-            best = None
-            if not keep_all_versions and find_column(header, *VERSION_COLUMNS):
-                best = best_versions(archive, member, header, wanted)
-            for row in rows_of(archive, member):
-                if keep_row(row, header, wanted, best, ordem_value):
-                    yield row
+        yield from _rows_from_archive(
+            archive,
+            table=table,
+            wanted=wanted,
+            ordem_value=ordem_value,
+            keep_all_versions=keep_all_versions,
+        )
 
 
 def fetch(

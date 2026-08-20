@@ -10,8 +10,9 @@ Usage:
     docs = list_filings(codigo_cvm=15423, date_from="2026-01-01", date_to="2026-08-20")
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
+from .artifacts import SourceObjectMeta, build_source_meta
 from .catalog import (
     cache_dir,
     catalog_diff,
@@ -28,9 +29,12 @@ from .client import (
     fetch_dfp,
     fetch_inf_diario,
     fetch_itr,
+    fetch_source_objects,
+    iter_archive_rows,
     iter_rows,
     list_tables,
 )
+from .constants import PARSER_VERSION
 from .datasets import (
     ALL_DATASETS,
     CATEGORIES,
@@ -65,10 +69,15 @@ __all__ = [
     "fetch_inf_diario",
     "fetch_cda",
     "fetch_cadastro",
+    "fetch_source_objects",
+    "iter_archive_rows",
     "iter_rows",
     "list_tables",
     "list_filings",
     "download_filings",
+    "SourceObjectMeta",
+    "build_source_meta",
+    "PARSER_VERSION",
     "CVMError",
     "CVMPortalError",
     "CVMEmptyResponseError",

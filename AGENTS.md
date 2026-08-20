@@ -4,7 +4,7 @@ Canonical agent contract for this repository — it guides Claude Code, Codex, a
 
 ## Project
 
-`cvmpy` is a Python client library for **CVM open data** (`dados.cvm.gov.br`) and live **RAD/ENET** filings. It crawls the portal autoindex (including `DADOS/HIST/`), mirrors ZIPs locally, applies CVM CSV hygiene (latin-1, `ORDEM_EXERC`, highest `VERSAO`, company/CNPJ match), and returns pandas DataFrames. Public API (`cvmpy/__init__.py`): `refresh_catalog`, `list_datasets`, `fetch`, `fetch_itr` / `fetch_dfp` / `fetch_inf_diario` / `fetch_cda` / `fetch_cadastro`, `iter_rows`, `list_filings`, `download_filings`, plus `CVMError` and subclasses. Library only — no CLI, no `__main__`. Legislation (`conteudo.cvm.gov.br`) is out of scope.
+`cvmpy` is a Python client library for **CVM open data** (`dados.cvm.gov.br`) and live **RAD/ENET** filings. It crawls the portal autoindex (including `DADOS/HIST/`), mirrors ZIPs locally, applies CVM CSV hygiene (latin-1, `ORDEM_EXERC`, highest `VERSAO`, company/CNPJ match), and returns pandas DataFrames. Public API (`cvmpy/__init__.py`): `refresh_catalog`, `list_datasets`, `fetch`, `fetch_itr` / `fetch_dfp` / `fetch_inf_diario` / `fetch_cda` / `fetch_cadastro`, `fetch_source_objects`, `iter_archive_rows`, `SourceObjectMeta`, `PARSER_VERSION`, `iter_rows`, `list_filings`, `download_filings`, plus `CVMError` and subclasses. Library only — no CLI, no `__main__`. Legislation (`conteudo.cvm.gov.br`) is out of scope.
 
 ## Stack
 
@@ -27,14 +27,15 @@ python -m build                                      # build sdist+wheel
 
 ## Architecture
 
-- `cvmpy/constants.py` — portal URLs, encodings, timeouts, unbounded-dataset paths.
+- `cvmpy/constants.py` — portal URLs, encodings, timeouts, crawl workers (default 2), unbounded-dataset paths.
 - `cvmpy/exceptions.py` — `CVMError` hierarchy.
 - `cvmpy/datasets.py` — curated `DATASETS` aliases (`ITR` → `CIA_ABERTA/DOC/ITR`, …). Hand-curated, not generated.
-- `cvmpy/http.py` — `requests` GET with retries; streaming ZIP download.
+- `cvmpy/http.py` — `requests` GET with Retry-After, 429/503 backoff, 304, circuit; streaming ZIP download.
 - `cvmpy/catalog.py` — CKAN + `/dados/` autoindex crawl including `HIST/`; `refresh_catalog` / `list_datasets` / `catalog_diff`.
-- `cvmpy/mirror.py` — disk cache invalidated on catalog `(modified, size_raw)`.
+- `cvmpy/artifacts.py` — public `SourceObjectMeta` descriptors.
+- `cvmpy/mirror.py` — disk cache invalidated on catalog `(modified, size_raw)`; SHA-256 stamps.
 - `cvmpy/hygiene.py` — latin-1 `;` CSV, company keys, `ORDEM_EXERC`, highest `VERSAO`.
-- `cvmpy/client.py` — `fetch` / `iter_rows` / convenience wrappers.
+- `cvmpy/client.py` — `fetch` / `iter_rows` / `fetch_source_objects` / `iter_archive_rows` / convenience wrappers.
 - `cvmpy/filings.py` — RAD/ENET `list_filings` / `download_filings` via `requests.Session`.
 - `cvmpy/__init__.py` — public re-exports; keep `__all__` in sync.
 

@@ -27,7 +27,7 @@ from .constants import (
 )
 from .datasets import DATASETS
 from .exceptions import CVMAmbiguousDatasetError, CVMCatalogError, CVMError, CVMPortalError
-from .http import http_get
+from .http import HttpClient, http_get
 
 LISTING_ROW = re.compile(
     r'<a href="([^"?][^"]*)">[^<]*</a>\s+(\d{2}-\w{3}-\d{4} \d{2}:\d{2})\s+(\S+)'
@@ -92,8 +92,21 @@ def parse_size(token: str) -> int:
     return int(float(match.group(1)) * SIZE_UNITS.get(match.group(2), 1))
 
 
-def listing(url: str) -> list[tuple[str, str, str]]:
-    body = http_get(url).decode("utf-8", "replace")
+def crawl_worker_count(override: int | None = None) -> int:
+    """Concurrent listing fetches per host. Default is two; never below one."""
+    if override is not None:
+        value = int(override)
+    else:
+        env = os.environ.get("CVMPY_CRAWL_WORKERS")
+        value = int(env) if env else CRAWL_WORKERS
+    if value < 1:
+        raise ValueError("crawl workers must be >= 1")
+    return value
+
+
+def listing(url: str, *, getter=None) -> list[tuple[str, str, str]]:
+    fetch = http_get if getter is None else getter
+    body = fetch(url).decode("utf-8", "replace")
     if "Index of" not in body:
         raise CVMPortalError(f"{url} is not a directory listing")
     return [
@@ -103,12 +116,12 @@ def listing(url: str) -> list[tuple[str, str, str]]:
     ]
 
 
-def walk(url: str, depth: int = 1) -> list[dict]:
+def walk(url: str, depth: int = 1, *, getter=None) -> list[dict]:
     files: list[dict] = []
-    for href, date, size in listing(url):
+    for href, date, size in listing(url, getter=getter):
         if href.endswith("/"):
             if depth < MAX_DEPTH:
-                files.extend(walk(url + href, depth + 1))
+                files.extend(walk(url + href, depth + 1, getter=getter))
             continue
         files.append({
             "url": url + href,
@@ -125,15 +138,24 @@ def period_of(name: str) -> str:
     return found[-1] if found else ""
 
 
-def crawl_tree() -> dict[str, dict]:
+def crawl_tree(workers: int | None = None, client: HttpClient | None = None) -> dict[str, dict]:
     """Every dataset under /dados/, keyed by path (e.g. CIA_ABERTA/DOC/ITR)."""
-    areas = [href for href, _, _ in listing(DATA_ROOT) if href.endswith("/")]
+    client = client or HttpClient()
+
+    def getter(url: str) -> bytes:
+        return client.fetch_bytes(url).content
+
+    areas = [href for href, _, _ in listing(DATA_ROOT, getter=getter) if href.endswith("/")]
     if not areas:
         raise CVMPortalError("no areas found under /dados/ — portal layout changed")
 
     datasets: dict[str, dict] = {}
-    with concurrent.futures.ThreadPoolExecutor(CRAWL_WORKERS) as pool:
-        for area, files in zip(areas, pool.map(lambda a: walk(DATA_ROOT + a), areas)):
+    worker_count = crawl_worker_count(workers)
+    with concurrent.futures.ThreadPoolExecutor(worker_count) as pool:
+        for area, files in zip(
+            areas,
+            pool.map(lambda a: walk(DATA_ROOT + a, getter=getter), areas),
+        ):
             for entry in files:
                 parts = entry["url"][len(DATA_ROOT):].split("/")
                 bucket_at = next(
@@ -158,8 +180,9 @@ def crawl_tree() -> dict[str, dict]:
     return datasets
 
 
-def fetch_ckan() -> tuple[list[dict], dict[str, str]]:
-    payload = json.loads(http_get(CKAN_PACKAGES).decode("utf-8"))
+def fetch_ckan(client: HttpClient | None = None) -> tuple[list[dict], dict[str, str]]:
+    getter = (lambda url: client.fetch_bytes(url).content) if client else http_get
+    payload = json.loads(getter(CKAN_PACKAGES).decode("utf-8"))
     if not payload.get("success"):
         raise CVMPortalError("CKAN package listing returned success=false")
     packages = []
@@ -178,7 +201,7 @@ def fetch_ckan() -> tuple[list[dict], dict[str, str]]:
                 for r in pkg.get("resources", [])
             ],
         })
-    groups_payload = json.loads(http_get(CKAN_GROUPS).decode("utf-8"))
+    groups_payload = json.loads(getter(CKAN_GROUPS).decode("utf-8"))
     groups = {g["name"]: g["title"] for g in groups_payload.get("result", [])}
     return packages, groups
 
@@ -204,9 +227,10 @@ def link_packages(datasets: dict[str, dict], packages: list[dict]) -> None:
             ds.setdefault("groups", pkg["groups"])
 
 
-def build_catalog() -> dict:
-    datasets = crawl_tree()
-    packages, groups = fetch_ckan()
+def build_catalog(workers: int | None = None, client: HttpClient | None = None) -> dict:
+    client = client or HttpClient()
+    datasets = crawl_tree(workers=workers, client=client)
+    packages, groups = fetch_ckan(client=client)
     link_packages(datasets, packages)
     external = [
         p for p in packages
@@ -318,11 +342,14 @@ def selected_files(ds: dict, start: str | None, end: str | None) -> list[dict]:
     return [f for f in ds["files"] if overlaps(f["period"], start, end)]
 
 
-def refresh_catalog(cache_dir_path: str | Path | None = None) -> dict:
+def refresh_catalog(
+    cache_dir_path: str | Path | None = None,
+    workers: int | None = None,
+) -> dict:
     cache = cache_dir(cache_dir_path)
     cache.mkdir(parents=True, exist_ok=True)
     current, previous = catalog_paths(cache)
-    catalog = build_catalog()
+    catalog = build_catalog(workers=workers)
     if current.exists():
         previous.write_text(current.read_text(encoding="utf-8"), encoding="utf-8")
     current.write_text(json.dumps(catalog, ensure_ascii=False, indent=1), encoding="utf-8")
