@@ -1,6 +1,6 @@
 # CVM data reference
 
-Developer notes for the CVM surfaces that `cvmdata` implements. Authoritative files live at [dados.cvm.gov.br](https://dados.cvm.gov.br/) and [rad.cvm.gov.br](https://www.rad.cvm.gov.br/). Legislation (`conteudo.cvm.gov.br`) is **not** in this package.
+Developer notes for the CVM surfaces that `cvmbr-data` implements. Authoritative files live at [dados.cvm.gov.br](https://dados.cvm.gov.br/) and [rad.cvm.gov.br](https://www.rad.cvm.gov.br/). Legislation (`conteudo.cvm.gov.br`) is **not** in this package.
 
 ## Two surfaces
 
@@ -37,7 +37,7 @@ Autoindex size tokens are rounded to three significant digits. Cache invalidatio
 
 ## Curated aliases
 
-See `cvmdata.DATASETS`. Important paths:
+See `cvmbr_data.DATASETS`. Important paths:
 
 | Alias | Path | Notes |
 |---|---|---|

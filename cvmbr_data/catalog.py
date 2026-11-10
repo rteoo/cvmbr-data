@@ -97,7 +97,7 @@ def crawl_worker_count(override: int | None = None) -> int:
     if override is not None:
         value = int(override)
     else:
-        env = os.environ.get("CVMDATA_CRAWL_WORKERS") or os.environ.get("CVMPY_CRAWL_WORKERS")
+        env = os.environ.get("CVMBR_DATA_CRAWL_WORKERS") or os.environ.get("CVMPY_CRAWL_WORKERS")
         value = int(env) if env else CRAWL_WORKERS
     if value < 1:
         raise ValueError("crawl workers must be >= 1")

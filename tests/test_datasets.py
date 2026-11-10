@@ -2,7 +2,7 @@
 
 import re
 
-from cvmdata.datasets import ALL_DATASETS, CATEGORIES, DATASETS
+from cvmbr_data.datasets import ALL_DATASETS, CATEGORIES, DATASETS
 
 
 def test_alias_keys_are_upper_snake():

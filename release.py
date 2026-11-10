@@ -1,4 +1,4 @@
-"""Release an already merged cvmdata version; never bumps or commits main."""
+"""Release an already merged cvmbr-data version; never bumps or commits main."""
 from __future__ import annotations
 import argparse
 import os
@@ -6,7 +6,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-REPO = 'rteoo/cvmdata'
+REPO = 'rteoo/cvmbr-data'
 ROOT = Path(__file__).resolve().parent
 GATES = [(sys.executable, '-m', 'pytest', '-m', 'not integration', '-v'), (sys.executable, '-m', 'build')]
 
@@ -50,9 +50,9 @@ def tag_version(tag):
     return tag[1:]
 
 def manifest_version():
-    m = re.search('^__version__\\s*=\\s*["\\\']([^"\\\']+)', (ROOT / 'cvmdata/__init__.py').read_text(encoding='utf-8'), re.M)
+    m = re.search('^__version__\\s*=\\s*["\\\']([^"\\\']+)', (ROOT / 'cvmbr_data/__init__.py').read_text(encoding='utf-8'), re.M)
     if not m:
-        raise RuntimeError('cvmdata/__init__.py has no __version__')
+        raise RuntimeError('cvmbr_data/__init__.py has no __version__')
     return m.group(1)
 
 def guard():

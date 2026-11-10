@@ -15,7 +15,7 @@ concurrency:
 jobs:
   build:
     name: Test and build distribution
-    if: github.repository == 'rteoo/cvmdata' && !github.event.release.prerelease
+    if: github.repository == 'rteoo/cvmbr-data' && !github.event.release.prerelease
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Check the release tag matches cvmdata.__version__
+      - name: Check the release tag matches cvmbr_data.__version__
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
@@ -39,9 +39,9 @@ jobs:
           tag = os.environ["RELEASE_TAG"]
           if not re.fullmatch(r"v(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)", tag):
               raise SystemExit(f"Release tag {tag!r} must match vX.Y.Z")
-          match = re.search(r'^__version__ = "([^"]+)"', Path("cvmdata/__init__.py").read_text(), re.MULTILINE)
+          match = re.search(r'^__version__ = "([^"]+)"', Path("cvmbr_data/__init__.py").read_text(), re.MULTILINE)
           if not match or tag != "v" + match.group(1):
-              raise SystemExit(f"Release tag {tag} does not match cvmdata.__version__ {match and match.group(1)!r}")
+              raise SystemExit(f"Release tag {tag} does not match cvmbr_data.__version__ {match and match.group(1)!r}")
           PY
 
       - name: Install package with dev extras
@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/cvmdata
+      url: https://pypi.org/p/cvmbr-data
     permissions:
       id-token: write
     steps:

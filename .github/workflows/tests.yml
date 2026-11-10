@@ -47,7 +47,7 @@ jobs:
         run: python -m build
       - name: Import the wheel outside the checkout
         run: |
-          python -m venv "$RUNNER_TEMP/cvmdata-wheel"
-          "$RUNNER_TEMP/cvmdata-wheel/bin/python" -m pip install dist/*.whl
+          python -m venv "$RUNNER_TEMP/cvmbr-data-wheel"
+          "$RUNNER_TEMP/cvmbr-data-wheel/bin/python" -m pip install dist/*.whl
           cd "$RUNNER_TEMP"
-          "$RUNNER_TEMP/cvmdata-wheel/bin/python" -c "from importlib.metadata import version; import cvmdata; assert version('cvmdata') == cvmdata.__version__; assert all(hasattr(cvmdata, name) for name in cvmdata.__all__)"
+          "$RUNNER_TEMP/cvmbr-data-wheel/bin/python" -c "from importlib.metadata import version; import cvmbr_data; assert version('cvmbr-data') == cvmbr_data.__version__; assert all(hasattr(cvmbr_data, name) for name in cvmbr_data.__all__)"

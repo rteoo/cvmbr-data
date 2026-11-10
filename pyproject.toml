@@ -3,7 +3,7 @@ requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cvmdata"
+name = "cvmbr-data"
 dynamic = ["version"]
 description = "Python client for CVM open data (dados.cvm.gov.br) and live RAD/ENET filings, returning pandas DataFrames with CVM file hygiene built in."
 readme = "README.md"
@@ -55,16 +55,16 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/rteoo/cvmdata"
-Repository = "https://github.com/rteoo/cvmdata"
-Issues = "https://github.com/rteoo/cvmdata/issues"
-Changelog = "https://github.com/rteoo/cvmdata/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/rteoo/cvmbr-data"
+Repository = "https://github.com/rteoo/cvmbr-data"
+Issues = "https://github.com/rteoo/cvmbr-data/issues"
+Changelog = "https://github.com/rteoo/cvmbr-data/blob/main/CHANGELOG.md"
 
 [tool.setuptools.dynamic]
-version = { attr = "cvmdata.__version__" }
+version = { attr = "cvmbr_data.__version__" }
 
 [tool.setuptools.packages.find]
-include = ["cvmdata*"]
+include = ["cvmbr_data*"]
 exclude = ["tests*"]
 
 [tool.pytest.ini_options]

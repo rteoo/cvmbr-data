@@ -1,20 +1,22 @@
-# cvmdata release preparation
+# cvmbr-data release preparation
 
-The repository, distribution, and import package are named `cvmdata`.
+The repository and PyPI distribution are `cvmbr-data`; the Python import package
+is `cvmbr_data`. Install with `pip install cvmbr-data` and import with
+`from cvmbr_data import ...`.
 The first prepared release under this name is **0.3.0**. Preparing these files
 does not publish a package or change repository visibility.
 
 ## Migration
 
-Change `from cvmpy ...` to `from cvmdata ...` and install the new distribution
+Change `from cvmpy ...` to `from cvmbr_data ...` and install the new distribution
 once published. This client is independent of the unrelated `cvmpy` project
-already on PyPI. The wheel intentionally ships only the `cvmdata` namespace.
+already on PyPI. The wheel intentionally ships only the `cvmbr_data` namespace.
 
 The default cache directory remains `%LOCALAPPDATA%/cvmpy` on Windows and
 `~/.cache/cvmpy` elsewhere, so existing archives and catalogs are reused.
 No cache files are renamed or removed. `cache_dir_path=` overrides
-`CVMDATA_CACHE`, which overrides legacy `CVMPY_CACHE`.
-`workers=` overrides `CVMDATA_CRAWL_WORKERS`, which overrides legacy
+`CVMBR_DATA_CACHE`, which overrides legacy `CVMPY_CACHE`.
+`workers=` overrides `CVMBR_DATA_CRAWL_WORKERS`, which overrides legacy
 `CVMPY_CRAWL_WORKERS`. Invalid configured values remain errors.
 
 The parser version, dataset aliases, CSV hygiene, and public function signatures
@@ -22,16 +24,16 @@ are unchanged. HTTP user agents and source library versions use the new identity
 
 ## GitHub and PyPI
 
-Rename `rteoo/cvmpy` to `rteoo/cvmdata`, preserving its repository ID, private
+Rename `rteoo/cvmdata` to `rteoo/cvmbr-data`, preserving its repository ID, private
 visibility, refs, and controls. The rollback is renaming the same repository
-back to `cvmpy`. Update origins to `https://github.com/rteoo/cvmdata.git`;
+back to `cvmdata`. Update origins to `https://github.com/rteoo/cvmbr-data.git`;
 existing checkout folders can stay in place.
 
 Register a pending Trusted Publisher on PyPI with:
 
 | Project | Owner | Repository | Workflow | Environment |
 |---|---|---|---|---|
-| `cvmdata` | `rteoo` | `cvmdata` | `publish.yml` | `pypi` |
+| `cvmbr-data` | `rteoo` | `cvmbr-data` | `publish.yml` | `pypi` |
 
 Create and protect the `pypi` GitHub environment before any publication. These
 files do not create it or prove its approval rules. A pending publisher does not
@@ -51,7 +53,7 @@ The release helper requires clean `main` matching freshly fetched `origin/main`,
 a matching source version, and passing offline tests/builds. Run it only after
 the patch is reviewed and merged. The publishing workflow additionally checks
 the tag, tests, and distribution metadata. It runs only for a published final
-GitHub Release in `rteoo/cvmdata`; ordinary pushes, tags, and prereleases do not
+GitHub Release in `rteoo/cvmbr-data`; ordinary pushes, tags, and prereleases do not
 publish. Live portal tests remain deliberate opt-in checks.
 
 Publication is a separate action. Existing files and tags are not deleted or

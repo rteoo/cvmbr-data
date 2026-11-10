@@ -35,7 +35,7 @@ CIRCUIT_FAILURES = 5
 MAX_RETRY_DELAY = 60.0
 PARSER_VERSION = "cvm-csv-latin1-1"
 
-CACHE_ENV = "CVMDATA_CACHE"
+CACHE_ENV = "CVMBR_DATA_CACHE"
 # Preserve existing mirrors during the package rename; callers can opt into a new path.
 CACHE_NAME = "cvmpy"
 
@@ -46,4 +46,4 @@ UNBOUNDED_PATHS = frozenset({
     "FI/DOC/CDA",
 })
 
-REPO_URL = "https://github.com/rteoo/cvmdata"
+REPO_URL = "https://github.com/rteoo/cvmbr-data"

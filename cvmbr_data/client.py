@@ -40,7 +40,7 @@ def fetch_source_objects(
 ):
     """Mirror matching archives and return public source-object descriptors.
 
-    Callers should import this from ``cvmdata``, not ``cvmdata.mirror``.
+    Callers should import this from ``cvmbr_data``, not ``cvmbr_data.mirror``.
     """
     start = _normalize_period(start)
     end = _normalize_period(end)
