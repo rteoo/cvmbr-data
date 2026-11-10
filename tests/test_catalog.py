@@ -4,7 +4,8 @@ import json
 
 import pytest
 
-from cvmpy.catalog import (
+from cvmdata.catalog import (
+    cache_dir,
     catalog_diff,
     catalog_paths,
     coverage,
@@ -19,7 +20,27 @@ from cvmpy.catalog import (
     select,
     span,
 )
-from cvmpy.exceptions import CVMAmbiguousDatasetError, CVMCatalogError, CVMError, CVMPortalError
+from cvmdata.exceptions import CVMAmbiguousDatasetError, CVMCatalogError, CVMError, CVMPortalError
+
+
+def test_cache_configuration_preserves_legacy_path_and_precedence(tmp_path, monkeypatch):
+    monkeypatch.setenv("CVMPY_CACHE", str(tmp_path / "legacy"))
+    monkeypatch.setenv("CVMDATA_CACHE", str(tmp_path / "current"))
+    assert cache_dir(tmp_path / "explicit") == tmp_path / "explicit"
+    assert cache_dir() == tmp_path / "current"
+    monkeypatch.delenv("CVMDATA_CACHE")
+    assert cache_dir() == tmp_path / "legacy"
+    monkeypatch.delenv("CVMPY_CACHE")
+    assert cache_dir().name == "cvmpy"
+
+
+def test_crawl_worker_configuration_preserves_legacy_variable(monkeypatch):
+    monkeypatch.setenv("CVMPY_CRAWL_WORKERS", "3")
+    monkeypatch.setenv("CVMDATA_CRAWL_WORKERS", "4")
+    assert crawl_worker_count(2) == 2
+    assert crawl_worker_count() == 4
+    monkeypatch.delenv("CVMDATA_CRAWL_WORKERS")
+    assert crawl_worker_count() == 3
 
 
 INDEX_HTML = """\
@@ -129,7 +150,7 @@ class TestParse:
 
 class TestListing:
     def test_parse_autoindex(self, monkeypatch):
-        monkeypatch.setattr("cvmpy.catalog.http_get", lambda url: INDEX_HTML.encode())
+        monkeypatch.setattr("cvmdata.catalog.http_get", lambda url: INDEX_HTML.encode())
         rows = listing("https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/DADOS/")
         hrefs = [r[0] for r in rows]
         assert "../" not in hrefs
@@ -137,7 +158,7 @@ class TestListing:
         assert "itr_cia_aberta_2024.zip" in hrefs
 
     def test_rejects_non_index(self, monkeypatch):
-        monkeypatch.setattr("cvmpy.catalog.http_get", lambda url: b"<html>not an index</html>")
+        monkeypatch.setattr("cvmdata.catalog.http_get", lambda url: b"<html>not an index</html>")
         with pytest.raises(CVMPortalError):
             listing("https://dados.cvm.gov.br/dados/")
 
@@ -194,11 +215,11 @@ class TestSelect:
 
 class TestWorkers:
     def test_default_is_two(self, monkeypatch):
-        monkeypatch.delenv("CVMPY_CRAWL_WORKERS", raising=False)
+        monkeypatch.delenv("CVMDATA_CRAWL_WORKERS", raising=False)
         assert crawl_worker_count() == 2
 
     def test_env_override(self, monkeypatch):
-        monkeypatch.setenv("CVMPY_CRAWL_WORKERS", "1")
+        monkeypatch.setenv("CVMDATA_CRAWL_WORKERS", "1")
         assert crawl_worker_count() == 1
 
     def test_rejects_zero(self):

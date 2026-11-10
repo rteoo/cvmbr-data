@@ -1,20 +1,48 @@
-# cvmpy
+# cvmdata
 
-Python client for **CVM open data** from the [Portal de Dados Abertos CVM](https://dados.cvm.gov.br/) and live **RAD/ENET** filings.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/rteoo/cvmdata/main/docs/cvmdata-icon.svg" width="128" alt="cvmdata financial filing icon">
+</p>
 
-Fetch bulk structured datasets (ITR, DFP, fund `INF_DIARIO`, CDA, …) as pandas DataFrames, with CVM file hygiene applied: latin-1, highest `VERSAO`, `ORDEM_EXERC` filter, and CNPJ/`CD_CVM` matching. Open data lags live RAD/ENET by about 1–2 days — use `list_filings` when you need what a company published today.
+<p align="center">
+  A Python client for CVM open data and RAD/ENET filings, with pandas DataFrames,
+  local archive caching, and source provenance.
+</p>
+
+<p align="center">
+  <a href="https://github.com/rteoo/cvmdata/actions/workflows/tests.yml"><img src="https://github.com/rteoo/cvmdata/actions/workflows/tests.yml/badge.svg" alt="Test status"></a>
+  <a href="pyproject.toml"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10 or newer"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
+</p>
+
+Fetch Brazilian company statements, fund disclosures, and registration data from
+the [Portal de Dados Abertos CVM](https://dados.cvm.gov.br/), or query
+[RAD/ENET](https://www.rad.cvm.gov.br/ENETWeb/frmConsultaExternaCVM.aspx)
+for company filings, without an API key. This is an independent client, not an
+official CVM product. Bulk datasets and live filings are separate publication
+surfaces; the library does not guarantee their synchronization or freshness.
+
+## Highlights
+
+- pandas DataFrames for ITR, DFP, fund `INF_DIARIO`, CDA, and other CVM datasets.
+- Catalog discovery includes historical `DADOS/HIST/` archives and curated aliases.
+- Local ZIP mirroring avoids duplicate downloads when catalog stamps are unchanged.
+- CVM CSV handling: latin-1, semicolon delimiters, highest `VERSAO`, `ORDEM_EXERC`,
+  and CNPJ or `CD_CVM` matching.
+- Source descriptors with SHA-256, exact byte size, URL, HTTP headers, and parser version.
+- RAD/ENET listing and document downloads with a protocol/version manifest.
 
 ## Installation
 
 ```bash
-pip install cvmpy
+pip install git+https://github.com/rteoo/cvmdata.git
 ```
 
 Or from source:
 
 ```bash
-git clone https://github.com/rteoo/cvmpy.git
-cd cvmpy
+git clone https://github.com/rteoo/cvmdata.git
+cd cvmdata
 pip install .
 ```
 
@@ -27,7 +55,7 @@ pip install .
 ## Quick Start
 
 ```python
-from cvmpy import refresh_catalog, fetch, fetch_itr, list_filings, download_filings
+from cvmdata import refresh_catalog, fetch, fetch_itr, list_filings, download_filings
 
 refresh_catalog()
 
@@ -49,7 +77,7 @@ The portal is a CKAN catalog over a directory autoindex. CKAN alone misses `DADO
 
 #### `refresh_catalog(cache_dir_path=None, workers=None)`
 
-Crawl `https://dados.cvm.gov.br/dados/` (including `HIST/`), merge CKAN titles, and write `catalog.json` to the cache directory. Default concurrency is two requests per host (`CVMPY_CRAWL_WORKERS` or `workers=`).
+Crawl `https://dados.cvm.gov.br/dados/` (including `HIST/`), merge CKAN titles, and write `catalog.json` to the cache directory. Default concurrency is two requests per host (`CVMDATA_CRAWL_WORKERS` or `workers=`).
 
 #### `list_datasets(area=None, grep=None)`
 
@@ -75,7 +103,7 @@ Mirror matching ZIPs (re-download only when the catalog stamp changes), stream t
 - DataFrame `.attrs` carry `source`, `table`, `ingested_at`, and source URLs.
 
 ```python
-from cvmpy import fetch, fetch_itr, DATASETS
+from cvmdata import fetch, fetch_itr, DATASETS
 
 dre = fetch_itr(start="2024", company="15423", table="DRE_con")
 print(DATASETS["ITR"])  # CIA_ABERTA/DOC/ITR
@@ -85,7 +113,7 @@ Convenience wrappers: `fetch_itr`, `fetch_dfp`, `fetch_inf_diario`, `fetch_cda`,
 
 #### `fetch_source_objects(dataset, start=None, end=None)`
 
-Mirror matching ZIPs (no duplicate download when the catalog stamp is unchanged) and return `SourceObjectMeta` records: SHA-256, exact byte size, source URL, local path, fetch time, HTTP headers, library version, and parser version `cvm-csv-latin1-1`. Import this from `cvmpy`, not from `cvmpy.mirror`.
+Mirror matching ZIPs (no duplicate download when the catalog stamp is unchanged) and return `SourceObjectMeta` records: SHA-256, exact byte size, source URL, local path, fetch time, HTTP headers, library version, and parser version `cvm-csv-latin1-1`. Import this from `cvmdata`, not from `cvmdata.mirror`.
 
 #### `iter_rows(...)` / `iter_archive_rows(payload)` / `list_tables(dataset)`
 
@@ -93,7 +121,7 @@ Row generator over mirrored archives, row generator over a ZIP/CSV already in me
 
 ### RAD/ENET filings
 
-Open data is the panel. For “what did this company file today?”, query live ENET.
+Query RAD/ENET directly when you need filings that may not yet appear in bulk datasets.
 
 #### `list_filings(codigo_cvm, date_from, date_to, all_docs=True)`
 
@@ -113,7 +141,73 @@ Cookie-primes the ENET session, writes PDF/ZIP/text files, rejects HTML shells, 
 
 ### Cache
 
-Default: `%LOCALAPPDATA%/cvmpy` on Windows, `~/.cache/cvmpy` elsewhere. Override with `cache_dir_path=` on any function or the `CVMPY_CACHE` environment variable.
+Default: `%LOCALAPPDATA%/cvmpy` on Windows, `~/.cache/cvmpy` elsewhere. The existing
+cache directory is deliberately preserved during the rename. Override it with
+`cache_dir_path=` or `CVMDATA_CACHE`; the legacy `CVMPY_CACHE` variable is also
+accepted. Explicit function arguments take precedence, followed by the new
+environment variable, then the legacy variable.
+
+### Migrating from the private cvmpy client
+
+Change imports from `cvmpy` to `cvmdata` and update source-install URLs to
+`https://github.com/rteoo/cvmdata`. The unrelated `cvmpy` project on PyPI is not
+this client; `cvmdata` does not install a competing `cvmpy` import package.
+`CVMPY_CACHE` and `CVMPY_CRAWL_WORKERS` remain supported, with the corresponding
+`CVMDATA_*` variables taking precedence. See [release preparation](docs/releasing.md).
+
+## API Limits
+
+- **Large fund datasets:** `fetch("INF_DIARIO")` and `fetch("CDA")` require a
+  `start` or `end` window. Use `iter_rows` for ingestion without materializing a
+  whole dataset as DataFrames.
+- **Date windows:** bulk periods are `yyyy` or `yyyymm`; RAD/ENET dates accept
+  `YYYY-MM-DD` or `DD/MM/YYYY`.
+- **Catalog:** refresh explicitly to discover changed files; cached data is not
+  a guarantee of current portal contents.
+- **Filings:** RAD/ENET availability and portal format can change. HTML download
+  shells are rejected rather than saved as documents.
+- **Scope:** this is a library, with no CLI. CVM legislation is outside its scope.
+
+## Project Structure
+
+```text
+cvmdata/
+├── cvmdata/
+│   ├── __init__.py      # Public API exports
+│   ├── artifacts.py     # SourceObjectMeta descriptors and checksums
+│   ├── catalog.py       # CKAN and autoindex discovery, including HIST/
+│   ├── client.py        # DataFrames, row iterators, and convenience wrappers
+│   ├── datasets.py      # Curated dataset aliases
+│   ├── filings.py       # RAD/ENET listing, downloads, and manifests
+│   ├── http.py          # HTTP, finite retries, and streamed downloads
+│   ├── hygiene.py       # CSV, version, company, and accounting filters
+│   └── mirror.py        # Local archive caching
+├── docs/
+│   └── cvmdata-icon.svg   # Editable project icon
+├── tests/               # Mocked unit tests and opt-in live tests
+├── pyproject.toml       # Packaging and test configuration
+├── CVM_DATA_REFERENCE.md
+└── README.md
+```
+
+## Development
+
+```bash
+pip install -e ".[dev]"
+python -m pytest -m "not integration"
+python -m build
+```
+
+Integration tests contact the live CVM portals and are excluded from CI. Run
+them deliberately with `python -m pytest tests/test_integration.py -m integration`
+when network access and live portal validation are intended. Offline tests do
+not establish current portal availability.
+
+## Data Source
+
+Bulk data comes from the [CVM Open Data Portal](https://dados.cvm.gov.br/).
+Company filings come from [RAD/ENET](https://www.rad.cvm.gov.br/ENETWeb/frmConsultaExternaCVM.aspx).
+See [CVM_DATA_REFERENCE.md](CVM_DATA_REFERENCE.md) for dataset and parser details.
 
 ## License
 

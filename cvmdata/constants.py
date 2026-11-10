@@ -35,7 +35,8 @@ CIRCUIT_FAILURES = 5
 MAX_RETRY_DELAY = 60.0
 PARSER_VERSION = "cvm-csv-latin1-1"
 
-CACHE_ENV = "CVMPY_CACHE"
+CACHE_ENV = "CVMDATA_CACHE"
+# Preserve existing mirrors during the package rename; callers can opt into a new path.
 CACHE_NAME = "cvmpy"
 
 # fetch() materializes tables in memory. These datasets are too large to pull
@@ -45,4 +46,4 @@ UNBOUNDED_PATHS = frozenset({
     "FI/DOC/CDA",
 })
 
-REPO_URL = "https://github.com/rteoo/cvmpy"
+REPO_URL = "https://github.com/rteoo/cvmdata"

@@ -1,16 +1,17 @@
-"""Public source-object API — no import of cvmpy.mirror required."""
+"""Public source-object API — no import of cvmdata.mirror required."""
 
 import hashlib
 import io
 import json
 import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from cvmpy import SourceObjectMeta, fetch_source_objects
-from cvmpy.catalog import catalog_paths
-from cvmpy.constants import PARSER_VERSION
-from cvmpy.http import HttpClient, StreamResult
+from cvmdata import SourceObjectMeta, build_source_meta, fetch_source_objects
+from cvmdata.catalog import catalog_paths
+from cvmdata.constants import PARSER_VERSION
+from cvmdata.http import HttpClient, StreamResult
 
 
 def _zip(payload: bytes) -> bytes:
@@ -18,6 +19,22 @@ def _zip(payload: bytes) -> bytes:
     with zipfile.ZipFile(buf, "w") as zipped:
         zipped.writestr("x.csv", payload)
     return buf.getvalue()
+
+
+def test_source_meta_default_timestamp_is_utc(tmp_path):
+    payload = tmp_path / "source.csv"
+    payload.write_bytes(b"CNPJ_CIA;VL\n1;2\n")
+    before = datetime.now(timezone.utc)
+
+    meta = build_source_meta(
+        payload,
+        source_url="https://dados.cvm.gov.br/dados/source.csv",
+        catalog_modified="2026-08-20 12:00",
+        catalog_size_raw="1K",
+    )
+
+    assert meta.fetched_at.tzinfo is timezone.utc
+    assert before <= meta.fetched_at <= datetime.now(timezone.utc)
 
 
 def test_fetch_source_objects_from_cache(tmp_path):

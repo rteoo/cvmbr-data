@@ -45,7 +45,7 @@ def cache_dir(override: str | Path | None = None) -> Path:
     """Local catalog/mirror root. Never inside a git repo by default."""
     if override is not None:
         return Path(override)
-    env = os.environ.get(CACHE_ENV)
+    env = os.environ.get(CACHE_ENV) or os.environ.get("CVMPY_CACHE")
     if env:
         return Path(env)
     if sys.platform == "win32":
@@ -97,7 +97,7 @@ def crawl_worker_count(override: int | None = None) -> int:
     if override is not None:
         value = int(override)
     else:
-        env = os.environ.get("CVMPY_CRAWL_WORKERS")
+        env = os.environ.get("CVMDATA_CRAWL_WORKERS") or os.environ.get("CVMPY_CRAWL_WORKERS")
         value = int(env) if env else CRAWL_WORKERS
     if value < 1:
         raise ValueError("crawl workers must be >= 1")

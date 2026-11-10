@@ -3,8 +3,8 @@
 import pytest
 import requests
 
-from cvmpy.exceptions import CVMPortalError
-from cvmpy.http import HttpClient, http_get, retry_delay
+from cvmdata.exceptions import CVMPortalError
+from cvmdata.http import HttpClient, http_get, retry_delay
 
 
 class _Resp:
@@ -32,12 +32,12 @@ def test_retry_after_numeric():
 
 
 def test_200_returns_bytes(monkeypatch):
-    monkeypatch.setattr("cvmpy.http.requests.get", lambda *a, **k: _Resp(b"ok"))
+    monkeypatch.setattr("cvmdata.http.requests.get", lambda *a, **k: _Resp(b"ok"))
     assert http_get("https://example.test/x") == b"ok"
 
 
 def test_304_is_not_modified(monkeypatch):
-    monkeypatch.setattr("cvmpy.http.requests.get", lambda *a, **k: _Resp(status=304, headers={"etag": "abc"}))
+    monkeypatch.setattr("cvmdata.http.requests.get", lambda *a, **k: _Resp(status=304, headers={"etag": "abc"}))
     result = HttpClient(sleep=lambda _: None).fetch_bytes("https://example.test/x", etag="abc")
     assert result.not_modified is True
     assert result.status_code == 304
@@ -53,14 +53,14 @@ def test_429_retries_then_succeeds(monkeypatch):
             return _Resp(status=429, headers={"Retry-After": "0"})
         return _Resp(b"ok")
 
-    monkeypatch.setattr("cvmpy.http.requests.get", fake_get)
+    monkeypatch.setattr("cvmdata.http.requests.get", fake_get)
     assert HttpClient(sleep=lambda _: None).fetch_bytes("https://example.test/x").content == b"ok"
     assert calls["n"] == 3
 
 
 def test_503_exhausted_raises(monkeypatch):
     monkeypatch.setattr(
-        "cvmpy.http.requests.get",
+        "cvmdata.http.requests.get",
         lambda *a, **k: _Resp(status=503, headers={"retry-after": "0"}),
     )
     with pytest.raises(CVMPortalError, match="503"):
@@ -74,7 +74,7 @@ def test_404_does_not_retry(monkeypatch):
         calls["n"] += 1
         return _Resp(status=404)
 
-    monkeypatch.setattr("cvmpy.http.requests.get", fake_get)
+    monkeypatch.setattr("cvmdata.http.requests.get", fake_get)
     with pytest.raises(CVMPortalError, match="404"):
         HttpClient(sleep=lambda _: None).fetch_bytes("https://example.test/x")
     assert calls["n"] == 1
@@ -91,7 +91,7 @@ def test_partial_stream_cleans_part_file(tmp_path, monkeypatch):
         resp.iter_content = boom
         return resp
 
-    monkeypatch.setattr("cvmpy.http.requests.get", fake_get)
+    monkeypatch.setattr("cvmdata.http.requests.get", fake_get)
     with pytest.raises(CVMPortalError):
         HttpClient(retries=1, sleep=lambda _: None).stream_to("https://example.test/file.zip", dest)
     assert not dest.exists()
@@ -101,7 +101,7 @@ def test_partial_stream_cleans_part_file(tmp_path, monkeypatch):
 def test_stream_304_leaves_existing(tmp_path, monkeypatch):
     dest = tmp_path / "file.zip"
     dest.write_bytes(b"cached-bytes")
-    monkeypatch.setattr("cvmpy.http.requests.get", lambda *a, **k: _Resp(status=304, headers={"etag": "1"}))
+    monkeypatch.setattr("cvmdata.http.requests.get", lambda *a, **k: _Resp(status=304, headers={"etag": "1"}))
     result = HttpClient(sleep=lambda _: None).stream_to(
         "https://example.test/file.zip", dest, etag="1",
     )
@@ -111,7 +111,7 @@ def test_stream_304_leaves_existing(tmp_path, monkeypatch):
 
 def test_circuit_opens_after_repeated_failures(monkeypatch):
     monkeypatch.setattr(
-        "cvmpy.http.requests.get",
+        "cvmdata.http.requests.get",
         lambda *a, **k: _Resp(status=503, headers={"retry-after": "0"}),
     )
     client = HttpClient(retries=1, circuit_failures=2, sleep=lambda _: None)

@@ -8,9 +8,9 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from cvmpy.catalog import catalog_paths
-from cvmpy.client import fetch, fetch_itr, iter_archive_rows, iter_rows, list_tables
-from cvmpy.exceptions import CVMEmptyResponseError, CVMError
+from cvmdata.catalog import catalog_paths
+from cvmdata.client import fetch, fetch_itr, iter_archive_rows, iter_rows, list_tables
+from cvmdata.exceptions import CVMEmptyResponseError, CVMError
 
 
 def _zip(members_map: dict[str, str]) -> bytes:

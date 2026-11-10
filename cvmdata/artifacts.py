@@ -1,10 +1,10 @@
-"""Warehouse-facing source-object descriptors. Public; does not import Strateo Markets."""
+"""Public source-object descriptors for reproducible data pipelines."""
 
 from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from .constants import PARSER_VERSION
@@ -58,7 +58,7 @@ def build_source_meta(
         byte_size=path.stat().st_size,
         source_url=source_url,
         local_path=str(path),
-        fetched_at=fetched_at or datetime.now(UTC),
+        fetched_at=fetched_at or datetime.now(timezone.utc),
         http_headers=http_headers or {},
         library_version=library_version or __version__,
         parser_version=parser_version,

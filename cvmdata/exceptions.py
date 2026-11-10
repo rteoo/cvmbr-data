@@ -1,4 +1,4 @@
-"""Exception hierarchy for cvmpy."""
+"""Exception hierarchy for cvmdata."""
 
 from __future__ import annotations
 
