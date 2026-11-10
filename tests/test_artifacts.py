@@ -1,4 +1,4 @@
-"""Public source-object API — no import of cvmdata.mirror required."""
+"""Public source-object API — no import of cvmbr_data.mirror required."""
 
 import hashlib
 import io
@@ -8,10 +8,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from cvmdata import SourceObjectMeta, build_source_meta, fetch_source_objects
-from cvmdata.catalog import catalog_paths
-from cvmdata.constants import PARSER_VERSION
-from cvmdata.http import HttpClient, StreamResult
+from cvmbr_data import SourceObjectMeta, build_source_meta, fetch_source_objects
+from cvmbr_data.catalog import catalog_paths
+from cvmbr_data.constants import PARSER_VERSION
+from cvmbr_data.http import HttpClient, StreamResult
 
 
 def _zip(payload: bytes) -> bytes:

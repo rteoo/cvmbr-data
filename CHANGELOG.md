@@ -1,10 +1,10 @@
 # Changelog
 
-## [v0.3.0] - Unreleased
+## [v0.3.0] - 2026-11-10
 
 ### Changed
-- Rename the canonical distribution, import package, and repository to `cvmdata`. Update downstream imports; no `cvmpy` namespace is shipped because that name belongs to an unrelated PyPI project.
-- Add `CVMDATA_CACHE` and `CVMDATA_CRAWL_WORKERS`, retaining the previous environment variables and default cache location for migration.
+- Rename the canonical distribution and repository to `cvmbr-data`, with the Python import package `cvmbr_data`. Update downstream imports; no `cvmpy` namespace is shipped because that name belongs to an unrelated PyPI project.
+- Add `CVMBR_DATA_CACHE` and `CVMBR_DATA_CRAWL_WORKERS`, retaining the previous environment variables and default cache location for migration.
 
 ### Fixed
 - Restore Python 3.10 imports by using `timezone.utc` instead of the Python 3.11-only `datetime.UTC` in source descriptors and mirror timestamps.

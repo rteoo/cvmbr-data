@@ -1,7 +1,7 @@
-# cvmdata
+# cvmbr-data
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/rteoo/cvmdata/main/docs/cvmdata-icon.svg" width="128" alt="cvmdata financial filing icon">
+  <img src="https://raw.githubusercontent.com/rteoo/cvmbr-data/v0.3.0/docs/cvmbr-data-icon.svg" width="128" alt="cvmbr-data financial filing icon">
 </p>
 
 <p align="center">
@@ -10,8 +10,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/rteoo/cvmdata/actions/workflows/tests.yml"><img src="https://github.com/rteoo/cvmdata/actions/workflows/tests.yml/badge.svg" alt="Test status"></a>
-  <a href="pyproject.toml"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10 or newer"></a>
+  <a href="https://github.com/rteoo/cvmbr-data/actions/workflows/tests.yml"><img src="https://github.com/rteoo/cvmbr-data/actions/workflows/tests.yml/badge.svg" alt="Test status"></a>
+  <a href="https://pypi.org/project/cvmbr-data/"><img src="https://img.shields.io/pypi/v/cvmbr-data?label=PyPI" alt="PyPI version"></a>
+  <a href="https://pypi.org/project/cvmbr-data/"><img src="https://img.shields.io/pypi/pyversions/cvmbr-data" alt="Supported Python versions"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
 </p>
 
@@ -34,15 +35,23 @@ surfaces; the library does not guarantee their synchronization or freshness.
 
 ## Installation
 
+Install the `cvmbr-data` distribution; use `cvmbr_data` in Python imports.
+
 ```bash
-pip install git+https://github.com/rteoo/cvmdata.git
+pip install cvmbr-data
+```
+
+Or install from the repository:
+
+```bash
+pip install git+https://github.com/rteoo/cvmbr-data.git
 ```
 
 Or from source:
 
 ```bash
-git clone https://github.com/rteoo/cvmdata.git
-cd cvmdata
+git clone https://github.com/rteoo/cvmbr-data.git
+cd cvmbr-data
 pip install .
 ```
 
@@ -55,7 +64,7 @@ pip install .
 ## Quick Start
 
 ```python
-from cvmdata import refresh_catalog, fetch, fetch_itr, list_filings, download_filings
+from cvmbr_data import refresh_catalog, fetch, fetch_itr, list_filings, download_filings
 
 refresh_catalog()
 
@@ -77,7 +86,7 @@ The portal is a CKAN catalog over a directory autoindex. CKAN alone misses `DADO
 
 #### `refresh_catalog(cache_dir_path=None, workers=None)`
 
-Crawl `https://dados.cvm.gov.br/dados/` (including `HIST/`), merge CKAN titles, and write `catalog.json` to the cache directory. Default concurrency is two requests per host (`CVMDATA_CRAWL_WORKERS` or `workers=`).
+Crawl `https://dados.cvm.gov.br/dados/` (including `HIST/`), merge CKAN titles, and write `catalog.json` to the cache directory. Default concurrency is two requests per host (`CVMBR_DATA_CRAWL_WORKERS` or `workers=`).
 
 #### `list_datasets(area=None, grep=None)`
 
@@ -103,7 +112,7 @@ Mirror matching ZIPs (re-download only when the catalog stamp changes), stream t
 - DataFrame `.attrs` carry `source`, `table`, `ingested_at`, and source URLs.
 
 ```python
-from cvmdata import fetch, fetch_itr, DATASETS
+from cvmbr_data import fetch, fetch_itr, DATASETS
 
 dre = fetch_itr(start="2024", company="15423", table="DRE_con")
 print(DATASETS["ITR"])  # CIA_ABERTA/DOC/ITR
@@ -113,7 +122,7 @@ Convenience wrappers: `fetch_itr`, `fetch_dfp`, `fetch_inf_diario`, `fetch_cda`,
 
 #### `fetch_source_objects(dataset, start=None, end=None)`
 
-Mirror matching ZIPs (no duplicate download when the catalog stamp is unchanged) and return `SourceObjectMeta` records: SHA-256, exact byte size, source URL, local path, fetch time, HTTP headers, library version, and parser version `cvm-csv-latin1-1`. Import this from `cvmdata`, not from `cvmdata.mirror`.
+Mirror matching ZIPs (no duplicate download when the catalog stamp is unchanged) and return `SourceObjectMeta` records: SHA-256, exact byte size, source URL, local path, fetch time, HTTP headers, library version, and parser version `cvm-csv-latin1-1`. Import this from `cvmbr_data`, not from `cvmbr_data.mirror`.
 
 #### `iter_rows(...)` / `iter_archive_rows(payload)` / `list_tables(dataset)`
 
@@ -143,17 +152,17 @@ Cookie-primes the ENET session, writes PDF/ZIP/text files, rejects HTML shells, 
 
 Default: `%LOCALAPPDATA%/cvmpy` on Windows, `~/.cache/cvmpy` elsewhere. The existing
 cache directory is deliberately preserved during the rename. Override it with
-`cache_dir_path=` or `CVMDATA_CACHE`; the legacy `CVMPY_CACHE` variable is also
+`cache_dir_path=` or `CVMBR_DATA_CACHE`; the legacy `CVMPY_CACHE` variable is also
 accepted. Explicit function arguments take precedence, followed by the new
 environment variable, then the legacy variable.
 
 ### Migrating from the private cvmpy client
 
-Change imports from `cvmpy` to `cvmdata` and update source-install URLs to
-`https://github.com/rteoo/cvmdata`. The unrelated `cvmpy` project on PyPI is not
-this client; `cvmdata` does not install a competing `cvmpy` import package.
+Change imports from `cvmpy` to `cvmbr_data` and update source-install URLs to
+`https://github.com/rteoo/cvmbr-data`. The unrelated `cvmpy` project on PyPI is not
+this client; `cvmbr-data` does not install a competing `cvmpy` import package.
 `CVMPY_CACHE` and `CVMPY_CRAWL_WORKERS` remain supported, with the corresponding
-`CVMDATA_*` variables taking precedence. See [release preparation](docs/releasing.md).
+`CVMBR_DATA_*` variables taking precedence. See [release preparation](docs/releasing.md).
 
 ## API Limits
 
@@ -171,8 +180,8 @@ this client; `cvmdata` does not install a competing `cvmpy` import package.
 ## Project Structure
 
 ```text
-cvmdata/
-├── cvmdata/
+cvmbr-data/
+├── cvmbr_data/
 │   ├── __init__.py      # Public API exports
 │   ├── artifacts.py     # SourceObjectMeta descriptors and checksums
 │   ├── catalog.py       # CKAN and autoindex discovery, including HIST/
@@ -183,12 +192,22 @@ cvmdata/
 │   ├── hygiene.py       # CSV, version, company, and accounting filters
 │   └── mirror.py        # Local archive caching
 ├── docs/
-│   └── cvmdata-icon.svg   # Editable project icon
+│   └── cvmbr-data-icon.svg   # Editable project icon
 ├── tests/               # Mocked unit tests and opt-in live tests
 ├── pyproject.toml       # Packaging and test configuration
 ├── CVM_DATA_REFERENCE.md
 └── README.md
 ```
+
+## Related Clients
+
+| Library | Python import | Official data source |
+|---|---|---|
+| [bcb-data](https://github.com/rteoo/bcb-data) | `bcb_data` | Banco Central do Brasil SGS |
+| [ibge-data](https://github.com/rteoo/ibge-data) | `ibge_data` | IBGE SIDRA, Aggregates, and Calendar |
+| [cvmbr-data](https://github.com/rteoo/cvmbr-data) | `cvmbr_data` | CVM open data and RAD/ENET filings |
+
+Each client is an independent package. Install only the libraries your project uses.
 
 ## Development
 

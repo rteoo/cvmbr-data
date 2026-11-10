@@ -3,9 +3,10 @@
 Source: [Teô Personal Design System](https://github.com/rteoo/design-system-teo),
 **v2.7.1 (Ink & Copper)**, selected by Teô for this library's project identity.
 
-- `docs/cvmdata-icon.svg` is the editable README artwork; `assets/icon.svg` is its
+- `docs/cvmbr-data-icon.svg` is the editable README artwork; `assets/icon.svg` is its
   byte-identical project-discovery copy. Update both together.
-- `docs/cvmpy-icon.svg` is retained as a compatibility URL for earlier README links.
+- `docs/cvmpy-icon.svg` and `docs/cvmdata-icon.svg` remain byte-identical
+  compatibility URLs for older READMEs. Update all four copies together.
 - The folded filing and table row represent disclosures and structured data,
   not an official CVM mark.
 - Colors follow the source tokens: ink canvas `#11151B`, primary foreground

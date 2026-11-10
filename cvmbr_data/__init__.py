@@ -1,8 +1,8 @@
 """
-cvmdata — Python client for CVM open data and live RAD/ENET filings.
+cvmbr_data — Python client for CVM open data and live RAD/ENET filings.
 
 Usage:
-    from cvmdata import refresh_catalog, fetch, fetch_itr, list_filings
+    from cvmbr_data import refresh_catalog, fetch, fetch_itr, list_filings
 
     refresh_catalog()
     dre = fetch("ITR", start="2024", company="15423", table="DRE_con")

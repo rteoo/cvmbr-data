@@ -4,7 +4,7 @@ import io
 import zipfile
 from pathlib import Path
 
-from cvmdata.hygiene import (
+from cvmbr_data.hygiene import (
     best_versions,
     company_key,
     keep_row,
