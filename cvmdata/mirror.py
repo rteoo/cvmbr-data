@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import zipfile
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from .artifacts import SourceObjectMeta, build_source_meta, sha256_file
@@ -130,7 +130,7 @@ class Mirror:
         from . import __version__
 
         digest = existing.get("sha256") or sha256_file(dest)
-        fetched = existing.get("fetched_at") or datetime.now(UTC).isoformat(timespec="seconds")
+        fetched = existing.get("fetched_at") or datetime.now(timezone.utc).isoformat(timespec="seconds")
         return {
             "modified": file_entry["modified"],
             "size_raw": file_entry["size_raw"],

@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.3.0] - Unreleased
+
+### Changed
+- Rename the canonical distribution, import package, and repository to `cvmdata`. Update downstream imports; no `cvmpy` namespace is shipped because that name belongs to an unrelated PyPI project.
+- Add `CVMDATA_CACHE` and `CVMDATA_CRAWL_WORKERS`, retaining the previous environment variables and default cache location for migration.
+
+### Fixed
+- Restore Python 3.10 imports by using `timezone.utc` instead of the Python 3.11-only `datetime.UTC` in source descriptors and mirror timestamps.
+
+### Added
+- Ink & Copper project artwork, a matching README introduction, and distribution build/import checks in CI.
+- A release workflow for the new project using PyPI Trusted Publishing.
+
 ## [v0.2.0] - 2026-08-20
 
 ### Added

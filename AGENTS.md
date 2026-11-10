@@ -4,7 +4,7 @@ Canonical agent contract for this repository — it guides Claude Code, Codex, a
 
 ## Project
 
-`cvmpy` is a Python client library for **CVM open data** (`dados.cvm.gov.br`) and live **RAD/ENET** filings. It crawls the portal autoindex (including `DADOS/HIST/`), mirrors ZIPs locally, applies CVM CSV hygiene (latin-1, `ORDEM_EXERC`, highest `VERSAO`, company/CNPJ match), and returns pandas DataFrames. Public API (`cvmpy/__init__.py`): `refresh_catalog`, `list_datasets`, `fetch`, `fetch_itr` / `fetch_dfp` / `fetch_inf_diario` / `fetch_cda` / `fetch_cadastro`, `fetch_source_objects`, `iter_archive_rows`, `SourceObjectMeta`, `PARSER_VERSION`, `iter_rows`, `list_filings`, `download_filings`, plus `CVMError` and subclasses. Library only — no CLI, no `__main__`. Legislation (`conteudo.cvm.gov.br`) is out of scope.
+`cvmdata` is a Python client library for **CVM open data** (`dados.cvm.gov.br`) and live **RAD/ENET** filings. It crawls the portal autoindex (including `DADOS/HIST/`), mirrors ZIPs locally, applies CVM CSV hygiene (latin-1, `ORDEM_EXERC`, highest `VERSAO`, company/CNPJ match), and returns pandas DataFrames. Public API (`cvmdata/__init__.py`): `refresh_catalog`, `list_datasets`, `fetch`, `fetch_itr` / `fetch_dfp` / `fetch_inf_diario` / `fetch_cda` / `fetch_cadastro`, `fetch_source_objects`, `iter_archive_rows`, `SourceObjectMeta`, `PARSER_VERSION`, `iter_rows`, `list_filings`, `download_filings`, plus `CVMError` and subclasses. Library only — no CLI, no `__main__`. Legislation (`conteudo.cvm.gov.br`) is out of scope.
 
 ## Stack
 
@@ -27,17 +27,17 @@ python -m build                                      # build sdist+wheel
 
 ## Architecture
 
-- `cvmpy/constants.py` — portal URLs, encodings, timeouts, crawl workers (default 2), unbounded-dataset paths.
-- `cvmpy/exceptions.py` — `CVMError` hierarchy.
-- `cvmpy/datasets.py` — curated `DATASETS` aliases (`ITR` → `CIA_ABERTA/DOC/ITR`, …). Hand-curated, not generated.
-- `cvmpy/http.py` — `requests` GET with Retry-After, 429/503 backoff, 304, circuit; streaming ZIP download.
-- `cvmpy/catalog.py` — CKAN + `/dados/` autoindex crawl including `HIST/`; `refresh_catalog` / `list_datasets` / `catalog_diff`.
-- `cvmpy/artifacts.py` — public `SourceObjectMeta` descriptors.
-- `cvmpy/mirror.py` — disk cache invalidated on catalog `(modified, size_raw)`; SHA-256 stamps.
-- `cvmpy/hygiene.py` — latin-1 `;` CSV, company keys, `ORDEM_EXERC`, highest `VERSAO`.
-- `cvmpy/client.py` — `fetch` / `iter_rows` / `fetch_source_objects` / `iter_archive_rows` / convenience wrappers.
-- `cvmpy/filings.py` — RAD/ENET `list_filings` / `download_filings` via `requests.Session`.
-- `cvmpy/__init__.py` — public re-exports; keep `__all__` in sync.
+- `cvmdata/constants.py` — portal URLs, encodings, timeouts, crawl workers (default 2), unbounded-dataset paths.
+- `cvmdata/exceptions.py` — `CVMError` hierarchy.
+- `cvmdata/datasets.py` — curated `DATASETS` aliases (`ITR` → `CIA_ABERTA/DOC/ITR`, …). Hand-curated, not generated.
+- `cvmdata/http.py` — `requests` GET with Retry-After, 429/503 backoff, 304, circuit; streaming ZIP download.
+- `cvmdata/catalog.py` — CKAN + `/dados/` autoindex crawl including `HIST/`; `refresh_catalog` / `list_datasets` / `catalog_diff`.
+- `cvmdata/artifacts.py` — public `SourceObjectMeta` descriptors.
+- `cvmdata/mirror.py` — disk cache invalidated on catalog `(modified, size_raw)`; SHA-256 stamps.
+- `cvmdata/hygiene.py` — latin-1 `;` CSV, company keys, `ORDEM_EXERC`, highest `VERSAO`.
+- `cvmdata/client.py` — `fetch` / `iter_rows` / `fetch_source_objects` / `iter_archive_rows` / convenience wrappers.
+- `cvmdata/filings.py` — RAD/ENET `list_filings` / `download_filings` via `requests.Session`.
+- `cvmdata/__init__.py` — public re-exports; keep `__all__` in sync.
 
 Load-bearing behavior to preserve:
 
@@ -50,7 +50,7 @@ Load-bearing behavior to preserve:
 - Dataset aliases resolve first; ambiguous fragments (`FI`) raise `CVMAmbiguousDatasetError`.
 - ENET structured downloads need a session that visited the consulta page. A `200 text/html` body is a failed download, never a filing.
 - Dual dates on RAD (`YYYY-MM-DD` and `DD/MM/YYYY`). Period filters on bulk fetch stay `yyyy` / `yyyymm`.
-- Cache default: `%LOCALAPPDATA%/cvmpy` or `~/.cache/cvmpy`, override with `cache_dir=` or `CVMPY_CACHE`.
+- Cache default remains `%LOCALAPPDATA%/cvmpy` or `~/.cache/cvmpy` during migration. Override with `cache_dir_path=` or `CVMDATA_CACHE`; legacy `CVMPY_CACHE` remains supported.
 
 ## Testing Conventions
 
@@ -63,8 +63,10 @@ pytest under `tests/`; classes `Test*`, methods `test_*`. The `integration` mark
 ## Release & CI
 
 - **Test CI:** `.github/workflows/tests.yml` runs `pytest -m "not integration"` on Python 3.10–3.13 for every push and PR to `main`.
-- Version is dynamic — `pyproject.toml` reads `cvmpy.__version__`. A release bumps only `__version__`, adds a `CHANGELOG.md` entry, and pushes a matching `v*` tag.
-- Canonical repo is `github.com/rteoo/cvmpy`.
+- Version is dynamic — `pyproject.toml` reads `cvmdata.__version__`. A release bumps only `__version__`, adds a `CHANGELOG.md` entry, and pushes a matching `v*` tag.
+- Canonical repo is `github.com/rteoo/cvmdata`.
+- Publishing uses `publish.yml` on a final GitHub Release, with the protected `pypi` environment and a matching PyPI Trusted Publisher. The new project must be configured before publication; see `docs/releasing.md`. A normal push or bare tag does not publish.
+- Never ship a `cvmpy` import alias: that PyPI name belongs to an unrelated project. Keep the legacy cache location and environment variables documented in the migration guide.
 
 ## Git
 

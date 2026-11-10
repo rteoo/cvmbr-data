@@ -28,14 +28,14 @@ RETRYABLE_STATUS = frozenset({429, 500, 502, 503, 504})
 def user_agent() -> str:
     from . import __version__
 
-    return f"cvmpy/{__version__} (+{REPO_URL})"
+    return f"cvmdata/{__version__} (+{REPO_URL})"
 
 
 def enet_user_agent() -> str:
     from . import __version__
 
     return (
-        "Mozilla/5.0 (compatible; cvmpy/{version}; +{repo})"
+        "Mozilla/5.0 (compatible; cvmdata/{version}; +{repo})"
         .format(version=__version__, repo=REPO_URL)
     )
 

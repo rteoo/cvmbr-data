@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-from cvmpy.exceptions import CVMEmptyResponseError, CVMPortalError
-from cvmpy.filings import (
+from cvmdata.exceptions import CVMEmptyResponseError, CVMPortalError
+from cvmdata.filings import (
     assign_stem,
     download_filings,
     format_enet_date,
@@ -122,7 +122,7 @@ class TestListFilings:
 
 class TestDownload:
     def test_rejects_html_shell(self, tmp_path, monkeypatch):
-        monkeypatch.setattr("cvmpy.filings.time.sleep", lambda s: None)
+        monkeypatch.setattr("cvmdata.filings.time.sleep", lambda s: None)
 
         def fake_get(url, **kwargs):
             response = MagicMock()
@@ -143,7 +143,7 @@ class TestDownload:
         assert frame.attrs["manifest"]
 
     def test_writes_pdf_and_manifest(self, tmp_path, monkeypatch):
-        monkeypatch.setattr("cvmpy.filings.time.sleep", lambda s: None)
+        monkeypatch.setattr("cvmdata.filings.time.sleep", lambda s: None)
 
         def fake_get(url, **kwargs):
             response = MagicMock()

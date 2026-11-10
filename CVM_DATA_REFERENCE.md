@@ -1,6 +1,6 @@
 # CVM data reference
 
-Developer notes for the CVM surfaces that `cvmpy` implements. Authoritative files live at [dados.cvm.gov.br](https://dados.cvm.gov.br/) and [rad.cvm.gov.br](https://www.rad.cvm.gov.br/). Legislation (`conteudo.cvm.gov.br`) is **not** in this package.
+Developer notes for the CVM surfaces that `cvmdata` implements. Authoritative files live at [dados.cvm.gov.br](https://dados.cvm.gov.br/) and [rad.cvm.gov.br](https://www.rad.cvm.gov.br/). Legislation (`conteudo.cvm.gov.br`) is **not** in this package.
 
 ## Two surfaces
 
@@ -37,7 +37,7 @@ Autoindex size tokens are rounded to three significant digits. Cache invalidatio
 
 ## Curated aliases
 
-See `cvmpy.DATASETS`. Important paths:
+See `cvmdata.DATASETS`. Important paths:
 
 | Alias | Path | Notes |
 |---|---|---|
@@ -76,4 +76,4 @@ File names: `YYYY-MM-DD-TYPE-topic.ext`. On slug collision, append `-p<protocolo
 | CDA recent months | Daily; older weekly |
 | ITR / DFP | After earnings; restatements land as new `VERSAO` |
 
-This library does not schedule jobs. `strateo-markets` (or a cron) should call `refresh_catalog` then `fetch` / `list_filings`.
+This library does not schedule jobs. A downstream application or scheduler should call `refresh_catalog` then `fetch` / `list_filings`.

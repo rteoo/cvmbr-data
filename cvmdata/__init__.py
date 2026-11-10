@@ -1,8 +1,8 @@
 """
-cvmpy — Python client for CVM open data and live RAD/ENET filings.
+cvmdata — Python client for CVM open data and live RAD/ENET filings.
 
 Usage:
-    from cvmpy import refresh_catalog, fetch, fetch_itr, list_filings
+    from cvmdata import refresh_catalog, fetch, fetch_itr, list_filings
 
     refresh_catalog()
     dre = fetch("ITR", start="2024", company="15423", table="DRE_con")
@@ -10,7 +10,7 @@ Usage:
     docs = list_filings(codigo_cvm=15423, date_from="2026-01-01", date_to="2026-08-20")
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 from .artifacts import SourceObjectMeta, build_source_meta
 from .catalog import (

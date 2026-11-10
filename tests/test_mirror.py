@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 import pytest
 
-from cvmpy.exceptions import CVMPortalError
-from cvmpy.http import HttpClient, StreamResult
-from cvmpy.mirror import Mirror
+from cvmdata.exceptions import CVMPortalError
+from cvmdata.http import HttpClient, StreamResult
+from cvmdata.mirror import Mirror
 
 
 def _zip_bytes(name: str = "x.csv", text: str = "a;b\n") -> bytes:
@@ -25,9 +25,9 @@ from unittest.mock import patch
 
 import pytest
 
-from cvmpy.exceptions import CVMPortalError
-from cvmpy.http import HttpClient, StreamResult
-from cvmpy.mirror import Mirror
+from cvmdata.exceptions import CVMPortalError
+from cvmdata.http import HttpClient, StreamResult
+from cvmdata.mirror import Mirror
 
 
 def _response(content: bytes, status: int = 200, headers=None):
@@ -127,7 +127,7 @@ class TestMirror:
         assert not dest.exists()
 
     def test_http_stream_writes_via_part(self, tmp_path, monkeypatch):
-        from cvmpy import http as http_mod
+        from cvmdata import http as http_mod
 
         dest = tmp_path / "file.zip"
         payload = _zip_bytes()

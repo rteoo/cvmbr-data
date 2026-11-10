@@ -4,12 +4,12 @@ from importlib import metadata
 
 import pytest
 
-import cvmpy
+import cvmdata
 
 
 def test_version_matches_package_metadata():
     try:
-        dist_version = metadata.version("cvmpy")
+        dist_version = metadata.version("cvmdata")
     except metadata.PackageNotFoundError:
-        pytest.skip("cvmpy is not installed; metadata unavailable")
-    assert dist_version == cvmpy.__version__
+        pytest.skip("cvmdata is not installed; metadata unavailable")
+    assert dist_version == cvmdata.__version__
