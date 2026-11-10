@@ -1,6 +1,6 @@
 # Changelog
 
-## [v0.3.0] - Unreleased
+## [v0.3.0] - 2026-11-10
 
 ### Changed
 - Rename the canonical distribution and repository to `cvmbr-data`, with the Python import package `cvmbr_data`. Update downstream imports; no `cvmpy` namespace is shipped because that name belongs to an unrelated PyPI project.

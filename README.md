@@ -1,7 +1,7 @@
 # cvmbr-data
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/rteoo/cvmbr-data/main/docs/cvmbr-data-icon.svg" width="128" alt="cvmbr-data financial filing icon">
+  <img src="https://raw.githubusercontent.com/rteoo/cvmbr-data/v0.3.0/docs/cvmbr-data-icon.svg" width="128" alt="cvmbr-data financial filing icon">
 </p>
 
 <p align="center">
@@ -11,7 +11,8 @@
 
 <p align="center">
   <a href="https://github.com/rteoo/cvmbr-data/actions/workflows/tests.yml"><img src="https://github.com/rteoo/cvmbr-data/actions/workflows/tests.yml/badge.svg" alt="Test status"></a>
-  <a href="pyproject.toml"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10 or newer"></a>
+  <a href="https://pypi.org/project/cvmbr-data/"><img src="https://img.shields.io/pypi/v/cvmbr-data?label=PyPI" alt="PyPI version"></a>
+  <a href="https://pypi.org/project/cvmbr-data/"><img src="https://img.shields.io/pypi/pyversions/cvmbr-data" alt="Supported Python versions"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
 </p>
 
@@ -35,13 +36,12 @@ surfaces; the library does not guarantee their synchronization or freshness.
 ## Installation
 
 Install the `cvmbr-data` distribution; use `cvmbr_data` in Python imports.
-The first PyPI release is being prepared. After publication:
 
 ```bash
 pip install cvmbr-data
 ```
 
-Until then, install from the repository:
+Or install from the repository:
 
 ```bash
 pip install git+https://github.com/rteoo/cvmbr-data.git
@@ -198,6 +198,16 @@ cvmbr-data/
 ├── CVM_DATA_REFERENCE.md
 └── README.md
 ```
+
+## Related Clients
+
+| Library | Python import | Official data source |
+|---|---|---|
+| [bcb-data](https://github.com/rteoo/bcb-data) | `bcb_data` | Banco Central do Brasil SGS |
+| [ibge-data](https://github.com/rteoo/ibge-data) | `ibge_data` | IBGE SIDRA, Aggregates, and Calendar |
+| [cvmbr-data](https://github.com/rteoo/cvmbr-data) | `cvmbr_data` | CVM open data and RAD/ENET filings |
+
+Each client is an independent package. Install only the libraries your project uses.
 
 ## Development
 
